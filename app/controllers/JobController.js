@@ -29,7 +29,7 @@ module.exports = {
         var metadata = [];
 
         busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
-
+            console.log('got file');
             var ws = gfs.createWriteStream({
                 mode: 'w',
                 content_type: mimetype,
@@ -56,8 +56,11 @@ module.exports = {
                 job.save(function(err) {
                     if (err) return console.log(err);
 
-                    file.job_id = job._id;
+                    job.next = '/job/' + job._id;
 
+                    file.job_id = job._id;
+                    delete file.file_id;
+                    console.log('adding message');
                     mq.addmessage(file, function(err) {
                         if (err) return res.status(500).json();
                         return res.status(200).json(job)
@@ -74,11 +77,14 @@ module.exports = {
             };
             metadata.push(meta);
         });
+
         req.pipe(busboy);
     },
     getOne: function (req, res) {
         Job.findOne({
             _id: req.params.id
+        }).select({
+            file_id: false
         }).exec(function(err, doc) {
             if (err) return res.status(500).json(200);
 

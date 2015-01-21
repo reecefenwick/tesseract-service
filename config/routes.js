@@ -21,4 +21,9 @@ router.get('/job/:id([0-9a-f]{24})', JobController.getOne);
 //router.post('/other', Other.create);
 //router.get('/other/:id([0-9a-f]{24})', Other.getOne);
 
+// Test view for demo purposes
+router.get('/demo', function (req, res) {
+   res.render('demo', { title: 'OCR Service' })
+});
+
 module.exports = router;

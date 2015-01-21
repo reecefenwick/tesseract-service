@@ -32,36 +32,38 @@ amqp.connect('amqp://localhost').then(function(conn) {
     process.once('SIGINT', function() { conn.close(); });
     return conn.createChannel().then(function(ch) {
 
-        var ok = ch.assertQueue('OCR', { durable: false, prefetch: 2 });
+        var ok = ch.assertQueue('OCR', { durable: false });
+
+        // Fetches 2 at a time
+        // In conjuction with noAck: false (below) - Server will only send more messages as you acknowledge existing
+        ch.prefetch(2, false);
 
         ok = ok.then(function(_qok) {
             return ch.consume('OCR', function(msg) {
-
+                console.log('received');
                 try {
                     var file = JSON.parse(msg.content.toString());
                     //console.log(file);
                 } catch (e) {
-                    console.log('error parsing json');
+                    console.log(e);
                     ch.ack(msg, false);
                     // Update database with parsing error - Wait how do we do this without an object ID
                     // Is JSON parse even necessary?
                 }
+                console.log(file);
                 var ext = mime.extension(file.contentType);
                 var writeStream = fs.createWriteStream('./tmp/' + file._id + '.' + ext);
                 // Use gfs.exists to confirm file is there
                 writeStream.on('finish', function() {
-                    console.log('done');
+                    console.log('write complete');
                     tesseract.process('./tmp/' + file._id + '.' + ext,function(err, text) {
-                        //console.log(text);
                         if (err) return console.log(err);
                         // Update database entry with text
-                        console.log(file);
                         Jobs.findOneAndUpdate({ _id: file.job_id }, { $set: { 'complete': true, 'result': text }}, {}, function(err, doc) {
-                            if (err) console.log(err);
-                            console.info(text);
-                            console.log(doc);
+                            if (err) return console.log(err);
+                            console.log('done');
+                            return ch.ack(msg, false)
                         });
-                        ch.ack(msg, false)
                     });
                 });
                 writeStream.on('error', function(err) {
