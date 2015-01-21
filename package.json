@@ -1,0 +1,27 @@
+{
+  "name": "application-name",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node server",
+    "test": "mocha tests/**/*.js -u tdd --timeout 50000"
+  },
+  "dependencies": {
+    "amqplib": "^0.3.0",
+    "body-parser": "~1.0.0",
+    "busboy": "^0.2.9",
+    "cookie-parser": "~1.0.1",
+    "debug": "~0.7.4",
+    "express": "~4.0.0",
+    "gridfs-stream": "^0.5.3",
+    "jade": "~1.3.0",
+    "mime": "^1.2.11",
+    "mongoose": "^3.8.21",
+    "morgan": "~1.0.0",
+    "static-favicon": "~1.0.0"
+  },
+  "devDependencies": {
+    "should": "^4.6.1",
+    "supertest": "^0.15.0"
+  }
+}
