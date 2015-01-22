@@ -27,9 +27,8 @@ module.exports = {
         });
 
         var metadata = [];
-
         busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
-            console.log('got file');
+
             var ws = gfs.createWriteStream({
                 mode: 'w',
                 content_type: mimetype,
@@ -60,9 +59,11 @@ module.exports = {
 
                     file.job_id = job._id;
                     delete file.file_id;
+                    delete job.file_id;
                     console.log('adding message');
                     mq.addmessage(file, function(err) {
                         if (err) return res.status(500).json();
+                        console.log(job);
                         return res.status(200).json(job)
                     });
                 });
@@ -72,7 +73,7 @@ module.exports = {
 
         busboy.on('field', function (fieldname, val, fieldnameTruncated, valTruncated) {
             var meta = {
-                name: fieldname,
+                key: fieldname,
                 value: val
             };
             metadata.push(meta);

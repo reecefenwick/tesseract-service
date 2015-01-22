@@ -43,25 +43,26 @@ amqp.connect('amqp://localhost').then(function(conn) {
                 console.log('received');
                 try {
                     var file = JSON.parse(msg.content.toString());
-                    //console.log(file);
                 } catch (e) {
                     console.log(e);
                     ch.ack(msg, false);
                     // Update database with parsing error - Wait how do we do this without an object ID
                     // Is JSON parse even necessary?
                 }
-                console.log(file);
+                console.log(file.job_id);
+
                 var ext = mime.extension(file.contentType);
                 var writeStream = fs.createWriteStream('./tmp/' + file._id + '.' + ext);
                 // Use gfs.exists to confirm file is there
                 writeStream.on('finish', function() {
-                    console.log('write complete');
+                    console.log('Image write complete');
                     tesseract.process('./tmp/' + file._id + '.' + ext,function(err, text) {
                         if (err) return console.log(err);
                         // Update database entry with text
+                        console.log('Tesseract Finished');
                         Jobs.findOneAndUpdate({ _id: file.job_id }, { $set: { 'complete': true, 'result': text }}, {}, function(err, doc) {
                             if (err) return console.log(err);
-                            console.log('done');
+                            console.log('Job updated in database');
                             return ch.ack(msg, false)
                         });
                     });

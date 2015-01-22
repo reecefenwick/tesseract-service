@@ -1,11 +1,10 @@
+var interval = null;
 $(function(){
     $('#demoUploadForm').ajaxForm({
         statusCode: {
             200: function(res) {
                 console.log(res);
-                fetchResults(res._id, function(result) {
-                    console.log(result);
-                })
+                interval = setInterval(fetchResults(res._id), 3000);
             },
             500: function(res) {
                 alert('There was an error uploading the file')
@@ -14,15 +13,20 @@ $(function(){
     })
 });
 
-var fetchResults = function(_id, callback) {
-    console.log('get')
-    setInterval(function(){
+var fetchResults = function(_id) {
+    console.log('get');
+    interval = setInterval(function(){
         $.ajax({
             type: "GET",
             url: "/job/" + _id,
             statusCode: {
                 200: function(res) {
-                    if (res.body.result) return callback(result);
+                    console.log(res.result);
+                    if (res.result) {
+                        clearInterval(interval);
+                        interval = null;
+                        displayResults(res.result)
+                    }
                 },
                 500: function(res) {
                     return alert('Something went wrong.')
@@ -36,6 +40,6 @@ var fetchResults = function(_id, callback) {
 
 };
 
-var displayResults = function(results) {
-  $('#results').html(results);
+var displayResults = function(result) {
+  $('#results').html(result).fadeIn(500);
 };

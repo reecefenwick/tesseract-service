@@ -23,17 +23,6 @@ head
 body
   .container
     .header
-      nav
-        ul.nav.nav-pills.pull-right
-          li.active(role='presentation')
-            a(href='#') Home
-
-          li(role='presentation')
-            a(href='#') About
-
-          li(role='presentation')
-            a(href='#') Contact
-
       h3.text-muted Ocr Service Demo
 
     .jumbotron
@@ -55,7 +44,7 @@ body
         button.btn.btn-default.btn-sm#demoUploadSubmit(type='submit') Submit
     br
     h3 Results:
-    pre
+    pre#results
       | Upload a file to see the results
     footer.footer
       p &copy; Reece Fenwick 2015

@@ -1,3 +1,10 @@
-/**
- * Created by reecefenwick on 20/01/15.
- */
+module.exports = {
+    mq: {
+        host: ''
+    },
+    database: {
+        host: '',
+        port: 27017,
+        name: 'ocr'
+    }
+};
