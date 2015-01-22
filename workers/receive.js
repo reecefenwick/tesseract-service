@@ -5,11 +5,13 @@
  * @help        :: See (link to doco) Apiary?
  */
 
+// Load Dependencies
 var mongoose = require('mongoose');
 var amqp = require('amqplib');
 var Grid = require('gridfs-stream');
 var fs = require('fs');
 var mime = require('mime');
+var async = require('async');
 
 var Jobs = require('./models/jobs');
 
@@ -40,46 +42,57 @@ amqp.connect('amqp://localhost').then(function(conn) {
 
         ok = ok.then(function(_qok) {
             return ch.consume('OCR', function(msg) {
-                console.log('received');
-                try {
-                    var file = JSON.parse(msg.content.toString());
-                } catch (e) {
-                    console.log(e);
-                    ch.ack(msg, false);
-                    // Update database with parsing error - Wait how do we do this without an object ID
-                    // Is JSON parse even necessary?
-                }
-                console.log(file.job_id);
+                async.waterfall([
+                    function(callback) {
+                        try {
+                            var file = JSON.parse(msg.content.toString());
+                            callback(null, file)
+                        } catch (err) {
+                            console.log(err);
+                            ch.ack(msg, false);
+                            return callback(err);
+                            // Update database with parsing error - Wait how do we do this without an object ID
+                            // Is JSON parse even necessary?
+                        }
+                    },
+                    function(file, callback) {
+                        console.log(file.job_id);
+                        var ext = mime.extension(file.contentType);
 
-                var ext = mime.extension(file.contentType);
-                var writeStream = fs.createWriteStream('./tmp/' + file._id + '.' + ext);
-                // Use gfs.exists to confirm file is there
-                writeStream.on('finish', function() {
-                    console.log('Image write complete');
-                    tesseract.process('./tmp/' + file._id + '.' + ext,function(err, text) {
-                        if (err) return console.log(err);
-                        // Update database entry with text
-                        console.log('Tesseract Finished');
+                        var filepath = './tmp/' + file._id + '.' + ext;
+
+                        var writeStream = fs.createWriteStream(filepath);
+
+                        writeStream.on('finish', function() {
+                            callback(null, file, filepath)
+                        });
+
+                        var readstream = gfs.createReadStream({ _id:  file._id }).pipe(writeStream);
+
+                        readstream.on('error', function(err) {
+                            console.log(err);
+                            callback(err);
+                        })
+                    },
+                    function(file, filepath, callback) {
+                        tesseract.process(filepath, function(err, text) {
+                            if (err) return callback(err);
+                            callback(null, file, text)
+                        })
+                    }
+                ], function (err, file, text) {
+                    if (err) {
+                        // Update job in database with error
+                        return ch.ack(msg, false);
+                    } else {
                         Jobs.findOneAndUpdate({ _id: file.job_id }, { $set: { 'complete': true, 'result': text }}, {}, function(err, doc) {
                             if (err) return console.log(err);
                             console.log('Job updated in database');
                             return ch.ack(msg, false)
                         });
-                    });
-                });
-                writeStream.on('error', function(err) {
-                    console.log(err);
-                    ch.ack(msg, false);
-                    // Update database with error
+                    }
                 });
 
-                var readstream = gfs.createReadStream({ _id:  file._id }).pipe(writeStream);
-
-                readstream.on('error', function(err) {
-                    console.log(err);
-                    // Update database with error
-                    ch.ack(msg, false);
-                })
             }, { noAck: false });
         });
 
@@ -88,3 +101,46 @@ amqp.connect('amqp://localhost').then(function(conn) {
         });
     });
 }).then(null, console.warn);
+
+
+
+//console.log('received');
+//try {
+//    var file = JSON.parse(msg.content.toString());
+//} catch (e) {
+//    console.log(e);
+//    ch.ack(msg, false);
+//    // Update database with parsing error - Wait how do we do this without an object ID
+//    // Is JSON parse even necessary?
+//}
+//console.log(file.job_id);
+//
+//var ext = mime.extension(file.contentType);
+//var writeStream = fs.createWriteStream('./tmp/' + file._id + '.' + ext);
+//// Use gfs.exists to confirm file is there
+//writeStream.on('finish', function() {
+//    console.log('Image write complete');
+//    tesseract.process('./tmp/' + file._id + '.' + ext,function(err, text) {
+//        if (err) return console.log(err);
+//        // Update database entry with text
+//        console.log('Tesseract Finished');
+//        Jobs.findOneAndUpdate({ _id: file.job_id }, { $set: { 'complete': true, 'result': text }}, {}, function(err, doc) {
+//            if (err) return console.log(err);
+//            console.log('Job updated in database');
+//            return ch.ack(msg, false)
+//        });
+//    });
+//});
+//writeStream.on('error', function(err) {
+//    console.log(err);
+//    ch.ack(msg, false);
+//    // Update database with error
+//});
+//
+//var readstream = gfs.createReadStream({ _id:  file._id }).pipe(writeStream);
+//
+//readstream.on('error', function(err) {
+//    console.log(err);
+//    // Update database with error
+//    ch.ack(msg, false);
+//})
