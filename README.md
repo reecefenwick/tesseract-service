@@ -2,6 +2,8 @@
 
 ## Prerequisites
 
+Install `NodeJS`
+
 Install `MongoDB`
 
 Install `RabbitMQ Server`
