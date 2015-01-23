@@ -1,4 +1,4 @@
-# OCR as A Service
+# OCR as a Service
 
 ## Prerequisites
 
