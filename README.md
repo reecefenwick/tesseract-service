@@ -2,11 +2,11 @@
 
 ## Prerequisites
 
-Requires `MongoDB`
+Install `MongoDB`
 
-Requires `RabbitMQ Server`
+Install `RabbitMQ Server`
 
-Requires `Tesseract OCR (latest)`
+Install `Tesseract OCR (latest)`
 
 
 ## Deploying locally
