@@ -3,7 +3,9 @@
 ## Prerequisites
 
 Requires `MongoDB`
+
 Requires `RabbitMQ Server`
+
 Requires `Tesseract OCR (latest)`
 
 
@@ -39,7 +41,7 @@ via node:
 
 via node from /workers directory:
 
-  node receive
+    node receive
 
 ## Documentation
 
