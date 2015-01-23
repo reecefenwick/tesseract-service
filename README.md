@@ -14,7 +14,7 @@ Install `Tesseract OCR (latest)`
 ## Deploying locally
 
 
-Console source via git and `cd` to folder:
+Clone source via git and `cd` to folder:
 
     Clone Repository - https://github.com/reecefenwick/tesseract-service.git
 
