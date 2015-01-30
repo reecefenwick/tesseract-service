@@ -17,14 +17,15 @@ describe('New OCR Job', function () {
             .expect(function(res) {
                 console.log(res.body);
                 res.body.should.have.property('_id');
-                res.body.should.have.property('_id');
-                res.body.should.have.property('_id');
-                res.body.should.have.property('_id');
+                res.body.should.have.property('complete');
+                res.body.should.have.property('result');
+                res.body.should.have.property('metadata');
                 job = res.body;
             })
-            .expect(200, done)
+            .expect(201, done)
     });
 
+    // Need to figure out how to "poll"
     //it('success when retrieving job', function(done) {
     //        request.get('/job/' + job._id)
     //            .expect(function(res) {
