@@ -65,24 +65,32 @@ module.exports = {
                 var job = new Job({
                     file_id: file._id,
                     complete: false,
+                    error: null,
                     result: null,
                     metadata: metadata
                 });
-
-                job.save(function(err) {
+                file.job = job;
+                job.save(function (err) {
                     if (err) return callback(err);
-
-                    job.next = '/job/' + job._id;
-
-                    file.job_id = job._id;
-                    delete file.file_id;
-                    delete job.file_id;
+                    callback(null, file, job);
                     console.log('adding message to queue');
-                    mq.addmessage(file, function(err) {
-                        if (err) return res.status(500).json();
-                        console.log(job);
-                        return res.status(200).json(job)
-                    });
+                });
+            },
+            function(file, job, callback) {
+                var message = file;
+
+                mq.addmessage(message, function (err) {
+                    if (err) return callback(err, null);
+
+                    var result = {
+                        _id: job._id,
+                        complete: job.complete,
+                        metadata: job.metadata,
+                        result: job.result,
+                        next: "/job/" + job._id
+                    };
+
+                    callback(null, result);
                 });
             }
         ], function (err, result) {
