@@ -16,7 +16,7 @@ module.exports = {
         }
     },
     db: {
-        host: 'mongodb://wva51351',
+        host: 'mongodb://localhost',
         port: 27017,
         name: 'ocr'
     }
