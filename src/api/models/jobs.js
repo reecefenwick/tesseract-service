@@ -11,12 +11,13 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var jobSchema = new Schema({
-    metadata: [{
-        _id: false,
-        key: { type: String },
-        value: { }
-    }],
-    file_id: String,
+    file: {
+        _id: {type: String, required: true},
+        filename: {type: String, required: true},
+        contentType: {type: String, required: true},
+        length: {type: Number, required: true},
+        uploadDate: {type: Date, required: true}
+    },
     complete: { type: Boolean, default: false },
     result: { type: String, default: null },
     error: { type: String, default: null }

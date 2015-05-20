@@ -8,8 +8,7 @@
 // Load dependencies
 var amqp = require('amqplib/callback_api');
 
-module.exports = {
-    addmessage: function(message, callback) {
+module.exports.addmessage = function(message, callback) { // Accept queue param?
 
         function bail(err, conn) {
             console.log(err);
@@ -61,5 +60,4 @@ module.exports = {
         //        });
         //    })).ensure(function() { conn.close(); });;
         //}).then(null, console.warn);
-    }
 };

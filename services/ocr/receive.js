@@ -53,7 +53,6 @@ amqp.connect('amqp://localhost').then(function(conn) {
                         try {
                             var file = JSON.parse(msg.content.toString());
                             callback(null, file);
-                            console.log(file);
                         } catch (err) {
                             return callback(err);
                             // Update database with parsing error - How do we do this without an object ID
@@ -61,30 +60,12 @@ amqp.connect('amqp://localhost').then(function(conn) {
                         }
                     },
                     function(file, callback) {
-                        console.log(file.job._id);
-                        var ext = mime.extension(file.contentType);
+                        var ext = '.' + mime.extension(file.contentType);
 
-                        var filepath = './tmp/' + file._id + '.' + ext;
+                        var filepath = './files/' + file._id + ext;
 
-                        var writeStream = fs.createWriteStream(filepath);
-
-                        writeStream.on('finish', function() {
-                            callback(null, file, filepath)
-                        });
-
-                        var readstream = gfs.createReadStream({ _id:  file._id }).pipe(writeStream);
-
-                        readstream.on('error', function(err) {
-                            console.log(err);
-                            callback(err);
-                        })
+                        callback(null, file, filepath);
                     },
-                    //function(file, callback) {
-                    //    if (file.content_type === "pdf")
-                    //    pdf_extract(path, options function(err) {
-                    //        See 'pdf-extract' library/module
-                    //    })
-                    //},
                     function(file, filepath, callback) {
                         tesseract.process(filepath, function(err, text) {
                             if (err) return callback(err);
@@ -97,6 +78,7 @@ amqp.connect('amqp://localhost').then(function(conn) {
                         // Update job in database with error
                         return ch.ack(msg, false);
                     } else {
+                        console.log(text);
                         Jobs.findOneAndUpdate({ _id: file.job._id }, { $set: { 'complete': true, 'result': text }}, {}, function(err, doc) {
                             if (err) return console.log(err);
                             console.log('Job updated in database');

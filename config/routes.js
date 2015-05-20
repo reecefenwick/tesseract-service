@@ -1,21 +1,21 @@
 /**
- * Users.js
+ * routes.js
  *
- * @description :: TODO: You might write a short summary of how this model works and what it represents here.
- * @docs        :: http://sailsjs.org/#!documentation/models
+ * @description :: Configure router
+ * @docs        ::
  */
 
 var express = require('express');
 var router = express.Router();
 
 // Load Controllers
-var JobController = require('../app/controllers/JobController');
+var JobController = require('../src/api/controllers/JobController');
 // var OtherControler = require('OtherController'); - Example
 
 // Map HTTP Endpoints to controllers
 // Configure Job Resource
 router.post('/job', JobController.newJob);
-router.get('/job/:id([0-9a-f]{24})', JobController.getOne);
+router.get('/job/:id([0-9a-f]{24})', JobController.getJob);
 
 //Configure Other Resource - This is an example
 //router.post('/other', Other.create);

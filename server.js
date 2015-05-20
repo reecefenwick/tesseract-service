@@ -11,7 +11,7 @@ var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
 var bodyParser = require('body-parser'); // TODO - Replace this
-mongoose = require('mongoose');
+var mongoose = require('mongoose');
 
 // Configure database connection
 mongoose.connect('mongodb://localhost:27017/ocr');
@@ -31,7 +31,7 @@ var routes = require('./config/routes');
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'app/views')); // TODO - Delete
+app.set('views', path.join(__dirname, 'src/views')); // TODO - Delete
 app.set('view engine', 'jade'); // TODO - Delete
 
 // Configure server middleware
@@ -56,25 +56,11 @@ app.use(function(req, res, next) {
 
 /// error handlers
 
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
     res.status(err.status || 500);
-    res.render('error', {
+    res.json({
         message: err.message,
-        error: {}
+        error: err.error
     });
 });
 

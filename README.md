@@ -1,4 +1,4 @@
-# OCR as a Service
+# Document Processing API
 
 ## Prerequisites
 
@@ -7,8 +7,6 @@ Install `NodeJS`
 Install `MongoDB`
 
 Install `RabbitMQ Server`
-
-Install `Tesseract OCR (latest)`
 
 
 ## Deploying locally
@@ -59,6 +57,6 @@ via node from /workers directory:
 
 ## Things to note
 
-* Basic demo has been setup - navigat to http://localhost:3000/demo
+* Basic demo has been setup - navigate to http://localhost:3000/demo
 * Only images are supported currently - PDF input will come later
 * Worker will eventually become its own standalone project
